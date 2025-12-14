@@ -1,6 +1,6 @@
 // tailwind.config.ts
 import type { Config } from "tailwindcss";
-import type { PluginAPI } from 'tailwindcss/types/config';
+import plugin from 'tailwindcss/plugin';
 
 const config: Config = {
   content: [
@@ -37,8 +37,9 @@ const config: Config = {
   },
   plugins: [
     // CRITICAL FIX: Define custom components here to bypass PostCSS compile errors
-    function ({ addComponents }: PluginAPI) {
-        addComponents({
+    // --- WRAP THE FUNCTION IN 'plugin' UTILITY ---
+    plugin(function ({ addComponents }) {
+      addComponents({
         '.cyber-btn': {
           // All the utility classes that were causing the error
           '@apply relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-white rounded-lg group bg-gradient-to-br from-neon-blue to-neon-pink group-hover:from-neon-blue group-hover:to-neon-pink hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300;': {},
