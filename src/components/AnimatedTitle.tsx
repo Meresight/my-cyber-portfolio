@@ -53,8 +53,8 @@ export default function AnimatedTitle({ text, className = "text-5xl", delay = 0 
     // --- FINAL STRUCTURAL FIX: SAFELY EXTRACT TRANSITION ---
     // Extract the stagger transition object from the container variant.
     // This resolves the TypeScript error: Property 'transition' does not exist on type 'Variant'.
-    const staggerTransition = container.show.transition || {};
-
+    const staggerTransition = (container.show as any).transition || {};
+    
     return (
         <motion.div 
             variants={container} 
