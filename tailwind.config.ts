@@ -1,5 +1,7 @@
 // tailwind.config.ts
+
 import type { Config } from "tailwindcss";
+// --- FIX 1: Import the standard plugin utility ---
 import plugin from 'tailwindcss/plugin';
 
 const config: Config = {
@@ -8,49 +10,47 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        'neon-blue': '#4dffff',
-        'neon-pink': '#ff00ff',
-        'cyber-dark': '#0f172a',
-        'cyber-border': '#1e293b',
-      },
-      fontFamily: {
-        sans: ['"Orbitron"', 'sans-serif'], 
+        'neon-blue': '#4cfffe',
+        'neon-pink': '#ff0077',
+        'dark-bg': '#0a0a0a',
       },
       boxShadow: {
-        'neon-blue': '0 0 5px #4dffff, 0 0 10px #4dffff, 0 0 20px #4dffff',
-        'neon-pink': '0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff',
+        'neon-blue': '0 0 5px #4cfffe, 0 0 10px #4cfffe, 0 0 15px #4cfffe',
+        'neon-pink': '0 0 5px #ff0077, 0 0 10px #ff0077, 0 0 15px #ff0077',
       },
-      animation: {
-        'text-reveal': 'text-reveal 0.5s ease-in-out forwards',
+      dropShadow: {
+        'neon-blue': '0 0 2px #4cfffe',
+        'neon-pink': '0 0 2px #ff0077',
       },
-      keyframes: {
-        'text-reveal': {
-          '0%': { transform: 'translateY(100%)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
+      fontFamily: {
+        // You can add a custom cyber/monospace font here if desired
+        sans: ['Inter', 'sans-serif'],
       },
     },
   },
+  // --- FIX 2 & 3: Use 'plugin' utility and ensure array syntax is correct ---
   plugins: [
     // CRITICAL FIX: Define custom components here to bypass PostCSS compile errors
-    // --- WRAP THE FUNCTION IN 'plugin' UTILITY ---
+    // Wrap the function in 'plugin' utility to correctly type parameters
     plugin(function ({ addComponents }) {
       addComponents({
         '.cyber-btn': {
-          // All the utility classes that were causing the error
-          '@apply relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-white rounded-lg group bg-gradient-to-br from-neon-blue to-neon-pink group-hover:from-neon-blue group-hover:to-neon-pink hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300;': {},
-          
-          // Style for the inner span
-          '& span': {
-            '@apply relative px-5 py-2.5 transition-all ease-in duration-75 bg-cyber-dark rounded-md group-hover:bg-opacity-0;': {},
+          '@apply bg-dark-bg text-neon-blue border-2 border-neon-blue px-6 py-3 uppercase tracking-widest text-lg font-bold transition-all duration-300': {},
+          '&:hover': {
+            '@apply bg-neon-blue text-dark-bg shadow-neon-blue': {},
+            // The property below is a fix for the hover state sometimes causing visual glitches
+            transform: 'translateY(-1px)', 
+          },
+          // This is a common utility for adding a glow effect on focus
+          '&:focus': {
+            '@apply outline-none ring-2 ring-neon-blue': {},
           },
         },
       })
-    }
+    }), // <--- FINAL SYNTAX FIX: This comma is critical for array parsing!
   ],
 };
 
