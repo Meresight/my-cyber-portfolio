@@ -11,9 +11,10 @@ const CHATFLOW_ID = process.env.NEXT_PUBLIC_CHATFLOW_ID;
 
 // Use dynamic import to disable SSR, which is necessary for the flowise-embed-react library
 const DynamicBubbleChat = dynamic(
-    () => import('flowise-embed-react').then((mod) => mod.BubbleChat),
+    // --- FINAL FIX: CAST THE IMPORTED COMPONENT TO 'any' ---
+    () => import('flowise-embed-react').then((mod) => mod.BubbleChat as any), 
     { 
-        ssr: false, // Prevents the server from trying to render client-side code
+        ssr: false, 
         // Optional: Add a loading component while the client-side code loads
         loading: () => <div style={{width: 50, height: 50, borderRadius: '50%', background: '#FF0077', position: 'fixed', bottom: 30, right: 30, opacity: 0.5, animation: 'pulse 1s infinite'}}></div> 
     }
@@ -33,9 +34,7 @@ export default function ChatAssistantBubble() {
             chatflowid={CHATFLOW_ID}
             apiHost={FLOWISE_HOST}
 
-            // --- CRITICAL FIX: Add scriptHost property ---
-            // This forces the component to load its JavaScript from the Flowise host, 
-            // resolving the 404 error seen in the Vercel production environment.
+            // This prop is functionally REQUIRED to fix the 404 runtime error.
             scriptHost={FLOWISE_HOST} 
             
             theme={{
