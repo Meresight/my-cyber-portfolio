@@ -9,11 +9,11 @@ import React from 'react';
 const FLOWISE_HOST = process.env.NEXT_PUBLIC_FLOWISE_HOST;
 const CHATFLOW_ID = process.env.NEXT_PUBLIC_CHATFLOW_ID;
 
-// Use dynamic import to disable SSR, which is now allowed because the file is a Client Component
+// Use dynamic import to disable SSR, which is necessary for the flowise-embed-react library
 const DynamicBubbleChat = dynamic(
     () => import('flowise-embed-react').then((mod) => mod.BubbleChat),
     { 
-        ssr: false, // <-- This is now valid!
+        ssr: false, // Prevents the server from trying to render client-side code
         // Optional: Add a loading component while the client-side code loads
         loading: () => <div style={{width: 50, height: 50, borderRadius: '50%', background: '#FF0077', position: 'fixed', bottom: 30, right: 30, opacity: 0.5, animation: 'pulse 1s infinite'}}></div> 
     }
@@ -22,6 +22,9 @@ const DynamicBubbleChat = dynamic(
 export default function ChatAssistantBubble() {
     // Safety Check: Render nothing if variables are missing
     if (!FLOWISE_HOST || !CHATFLOW_ID) {
+        if (process.env.NODE_ENV === 'development') {
+             console.warn("Flowise assistant disabled: NEXT_PUBLIC_FLOWISE_HOST or NEXT_PUBLIC_CHATFLOW_ID is missing from .env.local.");
+        }
         return null; 
     }
 
@@ -29,6 +32,12 @@ export default function ChatAssistantBubble() {
         <DynamicBubbleChat
             chatflowid={CHATFLOW_ID}
             apiHost={FLOWISE_HOST}
+
+            // --- CRITICAL FIX: Add scriptHost property ---
+            // This forces the component to load its JavaScript from the Flowise host, 
+            // resolving the 404 error seen in the Vercel production environment.
+            scriptHost={FLOWISE_HOST} 
+            
             theme={{
                 button: {
                     backgroundColor: "#FF0077", // Neon Pink/Magenta
