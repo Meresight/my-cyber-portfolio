@@ -1,7 +1,7 @@
 import { motion, Variants, Transition } from "framer-motion"; 
 import React from 'react';
 
-// --- INTERFACE FIX: Added 'delay' to resolve Vercel build error ---
+// --- INTERFACE FIX: Added 'delay' prop ---
 interface AnimatedTitleProps {
     /** The string of text to be animated. */
     text: string;
@@ -11,9 +11,8 @@ interface AnimatedTitleProps {
     delay?: number; 
 }
 
-
 // --- TRANSITION DEFINITION FIX ---
-// Define the spring transition object separately with the explicit Transition type.
+// Explicitly typed transition for each letter's animation.
 const springTransition: Transition = {
     type: "spring",
     damping: 12, 
@@ -31,18 +30,15 @@ const container: Variants = {
     }
 };
 
-// --- CHILD VARIANT (Per Letter) FIX ---
+// --- CHILD VARIANT (Per Letter) ---
 const child: Variants = {
-    // Start state
     hidden: { 
         opacity: 0, 
         y: 20 
     },
-    // End state
     show: {
         opacity: 1,
         y: 0,
-        // Apply the correctly typed transition here
         transition: springTransition,
     }
 };
@@ -51,33 +47,36 @@ const child: Variants = {
  * Animates a string of text, making each letter appear with a subtle spring effect.
  */
 export default function AnimatedTitle({ text, className = "text-5xl", delay = 0 }: AnimatedTitleProps) {
-    // Convert the string into an array of characters
+    
     const letters = Array.from(text);
+
+    // --- FINAL STRUCTURAL FIX: SAFELY EXTRACT TRANSITION ---
+    // Extract the stagger transition object from the container variant.
+    // This resolves the TypeScript error: Property 'transition' does not exist on type 'Variant'.
+    const staggerTransition = container.show.transition || {};
 
     return (
         <motion.div 
-            // Use the container variant on the wrapper element
             variants={container} 
             initial="hidden" 
             animate="show"
             
             // --- USAGE FIX: Apply the delay prop here ---
-            // Spread the container transition settings (like staggerChildren)
-            transition={{ delay: delay, ...container.show?.transition }} 
+            // Merge the explicit delay prop with the extracted stagger transition settings.
+            transition={{ 
+                delay: delay, 
+                ...staggerTransition 
+            }} 
             
             className={`font-bold tracking-tight ${className}`}
-            // Essential styles for the stagger effect to work correctly
             style={{ overflow: "hidden", display: "flex", flexWrap: "wrap" }} 
         >
             {letters.map((letter, index) => (
                 <motion.span 
-                    // Apply the child variant to each letter
                     variants={child} 
                     key={index}
-                    // Ensures letters don't wrap to the next line mid-word
                     style={{ display: "inline-block" }}
                 >
-                    {/* Replaces a space character with a non-breaking space for layout */}
                     {letter === " " ? "\u00A0" : letter}
                 </motion.span>
             ))}
