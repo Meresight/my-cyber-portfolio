@@ -1,35 +1,42 @@
-import { motion, Variants, Transition } from "framer-motion";
+import { motion, Variants, Transition } from "framer-motion"; 
 import React from 'react';
+
+// --- INTERFACE FIX: Added 'delay' to resolve Vercel build error ---
+interface AnimatedTitleProps {
+    /** The string of text to be animated. */
+    text: string;
+    /** The size of the text (e.g., "text-4xl", "text-xl"). */
+    className?: string;
+    /** Optional delay before the animation starts (in seconds). */
+    delay?: number; 
+}
+
 
 // --- TRANSITION DEFINITION FIX ---
 // Define the spring transition object separately with the explicit Transition type.
-// This resolves the TypeScript error during the Vercel build process.
 const springTransition: Transition = {
     type: "spring",
-    damping: 12, // Lower value for more oscillation
-    stiffness: 100, // Controls the speed of the animation
+    damping: 12, 
+    stiffness: 100, 
 };
 
 // --- CONTAINER VARIANT ---
-// This variant controls the animation of the whole line of text.
 const container: Variants = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.05, // Staggers the animation of each letter
+            staggerChildren: 0.05, 
         }
     }
 };
 
 // --- CHILD VARIANT (Per Letter) FIX ---
-// This variant controls the animation of each individual letter (the motion.span).
 const child: Variants = {
     // Start state
     hidden: { 
         opacity: 0, 
-        y: 20 // Starts 20px below its final position
-        // NOTE: We MUST NOT include the transition block here to prevent the build error.
+        y: 20 
     },
     // End state
     show: {
@@ -40,18 +47,10 @@ const child: Variants = {
     }
 };
 
-interface AnimatedTextProps {
-    /** The string of text to be animated. */
-    text: string;
-    /** The size of the text (e.g., "text-4xl", "text-xl"). */
-    className?: string;
-}
-
 /**
  * Animates a string of text, making each letter appear with a subtle spring effect.
- * This is perfect for headings, titles, or welcome messages.
  */
-export default function AnimatedText({ text, className = "text-5xl" }: AnimatedTextProps) {
+export default function AnimatedTitle({ text, className = "text-5xl", delay = 0 }: AnimatedTitleProps) {
     // Convert the string into an array of characters
     const letters = Array.from(text);
 
@@ -61,6 +60,11 @@ export default function AnimatedText({ text, className = "text-5xl" }: AnimatedT
             variants={container} 
             initial="hidden" 
             animate="show"
+            
+            // --- USAGE FIX: Apply the delay prop here ---
+            // Spread the container transition settings (like staggerChildren)
+            transition={{ delay: delay, ...container.show?.transition }} 
+            
             className={`font-bold tracking-tight ${className}`}
             // Essential styles for the stagger effect to work correctly
             style={{ overflow: "hidden", display: "flex", flexWrap: "wrap" }} 
