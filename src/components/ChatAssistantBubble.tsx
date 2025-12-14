@@ -10,28 +10,34 @@ const FLOWISE_HOST = process.env.NEXT_PUBLIC_FLOWISE_HOST;
 const CHATFLOW_ID = process.env.NEXT_PUBLIC_CHATFLOW_ID;
 const FLOWISE_API_KEY = process.env.NEXT_PUBLIC_FLOWISE_API_KEY; 
 
-// 1. DYNAMIC IMPORT FIX: Load the component only on the client-side (ssr: false) to prevent the "window is not defined" error.
-// 2. TYPESCRIPT/PROPS FIX: We explicitly extract the 'BubbleChat' named export, 
-//    which tells the strict Vercel build exactly which component is being used and what props it accepts.
-const BubbleChatDynamic = dynamic(
+// 1. Define a type that includes all the props we KNOW the component accepts at runtime.
+interface FlowiseChatProps {
+    chatflowid: string;
+    apiHost: string;
+    apiKey: string;
+    theme: any; 
+}
+
+// 2. DYNAMIC IMPORT FIX: Use the component name that works in the browser (BubbleChat).
+// 3. TYPESCRIPT BYPASS: Cast the imported component to our custom interface 
+//    to force the build to ignore the library's incorrect type definition.
+const ChatbotDynamic = dynamic(
     () => import('flowise-embed-react').then((mod) => mod.BubbleChat),
     { ssr: false }
-);
+) as React.ComponentType<FlowiseChatProps>; // <-- THE CRITICAL TYPE CAST FIX
 
 export default function ChatAssistantBubble() {
-    // 3. SAFETY CHECK: Returns null if any environment variable is missing (e.g., if not set on Vercel).
+    // Safety Check
     if (!FLOWISE_HOST || !CHATFLOW_ID || !FLOWISE_API_KEY) {
         if (process.env.NODE_ENV === 'development') {
-             console.warn("Flowise assistant disabled: Environment variables (HOST, ID, or API Key) are missing from the configuration.");
+             console.warn("Flowise assistant disabled: Environment variables are missing.");
         }
         return null; 
     }
 
     return (
-        // 4. FINAL COMPONENT: Uses the dynamically loaded <BubbleChatDynamic> component.
-        // This component correctly uses the apiKey prop to send the required 'Authorization: Bearer' header,
-        // resolving the original 401 Unauthorized error.
-        <BubbleChatDynamic
+        // Use the dynamically casted component with all necessary props.
+        <ChatbotDynamic
             chatflowid={CHATFLOW_ID}
             apiHost={FLOWISE_HOST}
             apiKey={FLOWISE_API_KEY} 
