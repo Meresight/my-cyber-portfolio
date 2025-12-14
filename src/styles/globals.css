@@ -1,0 +1,21 @@
+/* src/styles/globals.css */
+
+/* 1. Import Font */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+/* 2. Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3. Base Layer Configuration */
+@layer base {
+  body {
+    background-color: #0f172a; 
+    color: #f8fafc; 
+    @apply antialiased; 
+  }
+}
+
+/* 4. Custom Component Styles - DELETE THIS SECTION */
+/* It must be completely empty where the .cyber-btn used to be */
