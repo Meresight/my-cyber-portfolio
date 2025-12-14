@@ -1,58 +1,46 @@
-// src/components/AnimatedTitle.tsx
-"use client";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion"; // <-- IMPORT VARIANTS HERE
 
-interface AnimatedTitleProps {
-  text: string;
-  delay?: number;
-  className?: string;
-}
-
-export default function AnimatedTitle({ text, delay = 0, className }: AnimatedTitleProps) {
-  const letters = Array.from(text);
-
-  const container = {
+// Container variant definition (if you have one)
+const container: Variants = {
     hidden: { opacity: 0 },
-    visible: (i: number = 1) => ({
-      opacity: 1,
-      transition: { staggerChildren: 0.05, delayChildren: delay * i },
-    }),
-  };
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.05 // Example stagger
+        }
+    }
+};
 
-  const child = {
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
-      },
+// Child variant definition (THIS IS WHERE THE ERROR IS)
+const child: Variants = {
+    hidden: { 
+        opacity: 0, 
+        y: 20,
+        // REMOVE THE NESTED TRANSITION HERE TO AVOID CONFLICTS
+        // transition: { type: "spring", damping: 12, stiffness: 100 } 
     },
-    hidden: {
-      opacity: 0,
-      y: 20,
-      transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
-      },
-    },
-  };
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring", // Now, this transition works for the 'show' state
+            damping: 12,
+            stiffness: 100
+        }
+    }
+};
 
-  return (
-    <motion.div
-      style={{ overflow: "hidden", display: "flex" }}
-      variants={container}
-      initial="hidden"
-      animate="visible"
-      className={className}
-    >
-      {letters.map((letter, index) => (
-        <motion.span variants={child} key={index}>
-          {letter === " " ? "\u00A0" : letter}
-        </motion.span>
-      ))}
-    </motion.div>
-  );
+// ... The component logic
+export default function AnimatedText({ text }: { text: string }) {
+    // ...
+    return (
+        <motion.div variants={container} initial="hidden" animate="show">
+            {letters.map((letter, index) => (
+                // The transition for 'child' is now applied from the 'show' state, not the parent object.
+                <motion.span variants={child} key={index}> 
+                    {/* ... */}
+                </motion.span>
+            ))}
+        </motion.div>
+    );
 }
